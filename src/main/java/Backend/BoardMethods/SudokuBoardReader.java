@@ -29,7 +29,7 @@ public class SudokuBoardReader {
             e.printStackTrace();
         }
 
-        return new SudokuBoardReader(board);
+        return new SudokuBoard(board);
     }
 
 }
