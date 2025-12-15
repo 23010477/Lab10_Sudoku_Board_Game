@@ -6,10 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Mode0 extends SudokuBoardService {
-    private SudokuBoard board;
+
 
     public Mode0(SudokuBoard board) {
-        this.board = board;
+
+        super(board);
     }
 
     public List<String> boardValidate() {

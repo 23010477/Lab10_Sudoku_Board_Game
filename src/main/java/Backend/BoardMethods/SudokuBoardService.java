@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class SudokuBoardService {
-    private static final String PATH =
+        protected final SudokuBoard board;
 
-            "C:/Users/CozyAk/IdeaProjects/Lab9-Sodoku_solution_verifier/src/main/java/Backend/BoardMethods/test.txt";
+    public SudokuBoardService(SudokuBoard board) {
+        this.board = board;
+    }
 
     public boolean rowValidation(int index) {
-        int[] row = SudokuBoard.getInstance(PATH).getRow(index);
+        int[] row = board.getRow(index);
         ArrayList<Integer> duplicatedValues = new ArrayList<>();
         ArrayList<String> duplicatedValuesLocation = new ArrayList<>();
         boolean checkedValidation = true;
@@ -42,7 +44,7 @@ public abstract class SudokuBoardService {
     }
 
     public boolean columnValidation(int index) {
-        int[] column = SudokuBoard.getInstance(PATH).getColumn(index);
+        int[] column = board.getColumn(index);
         int length = column.length;
         ArrayList<Integer> duplicatedValues = new ArrayList<>();
         ArrayList<String> duplicatedValuesLocation = new ArrayList<>();
@@ -75,7 +77,7 @@ public abstract class SudokuBoardService {
     }
 
     public boolean boxValidation(int index) {
-        SudokuBoard SD = SudokuBoard.getInstance(PATH);
+        SudokuBoard SD = board;
         ArrayList<Integer> duplicatedValues = new ArrayList<>();
         ArrayList<String> duplicatedValuesLocation = new ArrayList<>();
         int[][] box = SD.get3x3Box(index);
@@ -119,7 +121,7 @@ public abstract class SudokuBoardService {
     }
 
     public boolean boardValidation() {
-        int[][] board = SudokuBoard.getInstance(PATH).getBoard();
+
         boolean checkedValidation = true;
         try {
             for (int i = 0; i < 9; i++) {
