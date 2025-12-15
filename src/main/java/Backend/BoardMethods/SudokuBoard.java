@@ -2,19 +2,13 @@ package Backend.BoardMethods;
 
 public class SudokuBoard {
     private final int[][] board;
-    private static SudokuBoard instance;
 
-    private SudokuBoard(int[][] board) {
+
+    public SudokuBoard(int[][] board) {
         this.board = board;
     }
 
-    public synchronized static SudokuBoard getInstance(String filePath) {
-        if (instance == null) {
-            int[][] readBoard = new SudokuBoardReader().ReadBoardFromFile(filePath);
-            instance = new SudokuBoard(readBoard);
-        }
-        return instance;
-    }
+
 
     public int[] getRow(int index) {
         if (index >= 0 && index <= 8) {
