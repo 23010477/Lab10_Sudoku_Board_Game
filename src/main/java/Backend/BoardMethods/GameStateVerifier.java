@@ -6,6 +6,25 @@ public class GameStateVerifier {
 
     public enum BoardState{VALID,INVALID,INCOMPLETE}
 
+    public static String VerifyGame(SudokuGame game){ // da zy el board state bas beyraga3 string messages
+        Mode0 validator = new Mode0(game.getSudokuBoard());
+        List<String> errors = validator.boardValidate();
+
+
+        StringBuilder verificationResults = new StringBuilder();
+
+        if(!errors.isEmpty()){
+            verificationResults.append("INVALID, Errors are: ");
+            for(String s:errors){
+                verificationResults.append(s).append("\n");
+            }
+        }else if(game.getEmptyCellCount()>0){
+            verificationResults.append("INCOMPLETE, Board has ").append(game.getEmptyCellCount()).append(" empty cells");
+
+        }else {verificationResults.append("VALID");}
+        return verificationResults.toString();
+    }
+
 
     //bosso homa t2reeban kolohm 7ayeb2o static 3a4an el mwdoo3 mafhoo4 instances 2slun w ya3ni el calls 7ateb2a 2shal
     public static BoardState getBoardState(SudokuGame sudokuGame){
