@@ -20,6 +20,24 @@ public class GameStateVerifier {
         else{ return BoardState.VALID;}
     }
 
+    public static boolean isColValid(SudokuGame game,int col){
+        Mode0 mode0 = new Mode0(game.getSudokuBoard());
+        return mode0.columnValidation(col);
+    }
+    public static boolean isRowValid(SudokuGame game,int col){
+        Mode0 mode0 = new Mode0(game.getSudokuBoard());
+        return mode0.rowValidation(col);
+    }
+
+    public static boolean isBoxValid (SudokuGame game,int box){
+        Mode0 mode0 = new Mode0(game.getSudokuBoard());
+        return mode0.boxValidation(box);
+    }
+
+
+
+
+
 
 
 }
