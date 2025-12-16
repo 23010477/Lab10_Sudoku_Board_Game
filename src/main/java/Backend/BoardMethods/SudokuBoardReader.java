@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class SudokuBoardReader {
 
-    public int[][] ReadBoardFromFile(String filename) {
+    public SudokuBoard ReadBoardFromFile(String filename) {
         int[][] board = new int[9][9];
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(filename))) {
