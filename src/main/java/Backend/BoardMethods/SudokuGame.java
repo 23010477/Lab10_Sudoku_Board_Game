@@ -50,6 +50,28 @@ public int getCellValue(int row, int col){  //bl marra..
         return sudokuBoard.getBoard()[row][col];
 }
 
+//3ayzeen ne3mel copies 3a4an testa3meloohm ba2a fl operations el gya ..2w el mafrood testa3meloohm ya3ni Rabena yestor
+
+    public int[][] arrayBoardCopy(){
+        int[][] originalBoard = sudokuBoard.getBoard();
+        int[][] boardCopy = new int[9][9];
+        for(int i = 0; i<9; i++)
+            System.arraycopy(originalBoard[i],0,boardCopy[i],0,9); //27la deep copy
+        return boardCopy;
+
+    } //returns copy mn el 2d 9x9 array for use
+
+
+    // copy lel object kamel ba2a
+
+    public SudokuGame gameObjCopy(){ //da keda copy mn el gameobj kamel
+
+        int [][] arrCopy = arrayBoardCopy();
+
+        return new SudokuGame(new SudokuBoard(arrCopy));
+
+
+    }
 
 
 }
