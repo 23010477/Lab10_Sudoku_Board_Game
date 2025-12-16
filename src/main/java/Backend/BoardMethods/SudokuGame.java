@@ -33,10 +33,22 @@ public class SudokuGame {
         return emptyCells;
     }
 
+//functions to "play" the game b2a 3yzeen ne3mel set l values fl 9x9 array , w n3mel check f kol set 3la el zeros
+// assume el player can put a cell as 0/ empty .
 
+public void setCellValue(int row, int col, int value){
+        int[][] board = sudokuBoard.getBoard();
+        int prevValue = board[row][col];
+        board[row][col]= value;
 
+        if (prevValue== 0 && value != 0){
+            emptyCells--;
+        }else if (prevValue != 0 && value ==0){ emptyCells++;}
+}
 
-
+public int getCellValue(int row, int col){  //bl marra..
+        return sudokuBoard.getBoard()[row][col];
+}
 
 
 
