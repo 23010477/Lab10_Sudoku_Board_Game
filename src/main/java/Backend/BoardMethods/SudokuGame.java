@@ -73,5 +73,7 @@ public int getCellValue(int row, int col){  //bl marra..
 
     }
 
-
+    public SudokuBoard getSudokuBoard() {
+        return sudokuBoard;
+    }
 }
