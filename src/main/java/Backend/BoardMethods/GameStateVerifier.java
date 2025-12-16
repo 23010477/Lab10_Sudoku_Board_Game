@@ -34,7 +34,20 @@ public class GameStateVerifier {
         return mode0.boxValidation(box);
     }
 
+    private static int[][] getBoardCopy(SudokuGame game){
+        return game.arrayBoardCopy();
+    }
+    public static String getEmptyCellIndices(SudokuGame game){ //teb2o t3melo parse b2a
+        StringBuilder indices = new StringBuilder();
+        int[][] board = getBoardCopy(game);
 
+        for(int row = 0; row <9; row++){
+            for(int col = 0; col<9 ; col++){
+                indices.append("(").append(row+1).append(",").append(col+1).append(")").append("\n");
+            }
+        }
+        return indices.toString();
+    }
 
 
 
