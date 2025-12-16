@@ -14,8 +14,12 @@ public class GameStateVerifier {
         List<String> errors = validator.boardValidate();
 
         if(!errors.isEmpty()){
-
-        }
-        return null;
+            return BoardState.INVALID;
+        }else if(sudokuGame.getEmptyCellCount()>0)
+            return BoardState.INCOMPLETE;
+        else{ return BoardState.VALID;}
     }
+
+
+
 }
