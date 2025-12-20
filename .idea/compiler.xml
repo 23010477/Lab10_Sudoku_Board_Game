@@ -6,11 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="Lab9-Sodoku_solution_verifier" />
         <module name="Lab10_Sudoku_Board_Game" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="Lab9-Sodoku_solution_verifier" target="24" />
-    </bytecodeTargetLevel>
   </component>
 </project>
