@@ -8,10 +8,10 @@ public interface Viewable {
     // Returns a random game with the specified difficulty
     // Note: the Game class is the representation of the soduko game in the
     // controller
-    Game getGame(DifficultyEnum level) throws NotFoundException;
+    Game getGame(DifficultyEnum level);
 
     // Gets a sourceSolution and generates three levels of difficulty
-    void driveGames(Game sourceGame) throws SolutionInvalidException;
+    void driveGames(Game sourceGame);
 
     // Given a game, if invalid returns invalid and the locates the invalid
     // duplicates
@@ -30,7 +30,7 @@ public interface Viewable {
     // board
     // one other way to to try to encode the location and the answer all in just one
     // int
-    int[] solveGame(Game game) throws InvalidGame;
+    int[] solveGame(Game game);
 
     // Logs the user action
     void logUserAction(String userAction) throws IOException;

@@ -29,22 +29,22 @@ public class SudokuController implements Viewable {
     }
 
     @Override
-    public Game getGame(DifficultyEnum level) throws NotFoundException {
+    public Game getGame(DifficultyEnum level) {
         // Basic implementation: Pick random
         String path = BASE_PATH + "/" + level.toString().toLowerCase();
         File folder = new File(path);
         File[] files = folder.listFiles();
         if (files == null || files.length == 0)
-            throw new NotFoundException("No " + level + " games found.");
+            throw new RuntimeException("No " + level + " games found.");
 
         File selected = files[new Random().nextInt(files.length)];
         return loadGame(selected);
     }
 
-    public Game getIncompleteGame() throws NotFoundException {
+    public Game getIncompleteGame() {
         File f = new File(BASE_PATH + "/current/game.txt");
         if (!f.exists())
-            throw new NotFoundException("No incomplete game.");
+            throw new RuntimeException("No incomplete game.");
         return loadGame(f);
     }
 
@@ -64,7 +64,7 @@ public class SudokuController implements Viewable {
     }
 
     @Override
-    public void driveGames(Game sourceGame) throws SolutionInvalidException {
+    public void driveGames(Game sourceGame) {
         // Assume sourceGame is valid full solution for now
         // Generate E/M/H
         generate(sourceGame, 10, "easy");
@@ -138,7 +138,7 @@ public class SudokuController implements Viewable {
     }
 
     @Override
-    public int[] solveGame(Game game) throws InvalidGame {
+    public int[] solveGame(Game game) {
         // Should implement the Permutation solver here
         // For now, return empty array implies no solution or just stub
         return new int[0];

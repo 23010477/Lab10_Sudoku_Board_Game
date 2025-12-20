@@ -17,7 +17,7 @@ public class SudokuAdapter implements Controllable {
     }
 
     @Override
-    public int[][] getGame(char level) throws NotFoundException {
+    public int[][] getGame(char level) {
         DifficultyEnum diff = DifficultyEnum.EASY;
         if (level == 'm' || level == 'M')
             diff = DifficultyEnum.MEDIUM;
@@ -38,11 +38,11 @@ public class SudokuAdapter implements Controllable {
     }
 
     @Override
-    public void driveGames(String sourcePath) throws SolutionInvalidException {
+    public void driveGames(String sourcePath) {
         // Load Game from path
         java.io.File f = new java.io.File(sourcePath);
         if (!f.exists())
-            throw new SolutionInvalidException("File not found: " + sourcePath);
+            throw new RuntimeException("File not found: " + sourcePath);
 
         // Basic loader
         int[][] b = new int[9][9];
@@ -52,7 +52,7 @@ public class SudokuAdapter implements Controllable {
                     if (s.hasNextInt())
                         b[i][j] = s.nextInt();
         } catch (Exception e) {
-            throw new SolutionInvalidException("Error reading file");
+            throw new RuntimeException("Error reading file");
         }
 
         controller.driveGames(new Game(b));
@@ -92,7 +92,7 @@ public class SudokuAdapter implements Controllable {
     }
 
     @Override
-    public int[][] solveGame(int[][] game) throws InvalidGame {
+    public int[][] solveGame(int[][] game) {
         int[] solution = controller.solveGame(new Game(game));
         // Parse int[] logic (not defined in Controller yet).
         return new int[0][0]; // Stub
