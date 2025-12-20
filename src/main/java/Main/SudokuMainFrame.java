@@ -50,24 +50,7 @@ public class SudokuMainFrame extends JFrame {
     }
 
     private void showDifficultySelection(boolean hasAllModes) {
-        if (!hasAllModes) {
-            // Ask for source solution
-            String path = JOptionPane.showInputDialog(this, "No games found. Enter path to Solved Sudoku file:");
-            if (path != null && !path.trim().isEmpty()) {
-                try {
-                    controller.driveGames(path);
-                    JOptionPane.showMessageDialog(this, "Games Generated!");
-                    promptDifficulty();
-                } catch (SolutionInvalidException e) {
-                    JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
-                    System.exit(1);
-                }
-            } else {
-                System.exit(0);
-            }
-        } else {
-            promptDifficulty();
-        }
+        promptDifficulty();
     }
 
     private void promptDifficulty() {
@@ -93,7 +76,7 @@ public class SudokuMainFrame extends JFrame {
         try {
             int[][] board = controller.getGame(level);
             setupGameUI(board);
-        } catch (NotFoundException e) {
+        } catch (RuntimeException e) {
             JOptionPane.showMessageDialog(this, "Game not found: " + e.getMessage());
         }
     }
