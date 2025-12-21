@@ -13,6 +13,7 @@ public class SudokuMainFrame extends JFrame {
     private JPanel controlPanel;
     private JButton verifyBtn;
     private JButton solveBtn;
+    private JButton showSolutionBtn;
     private JButton undoBtn;
     private JButton backBtn;
 
@@ -129,6 +130,8 @@ public class SudokuMainFrame extends JFrame {
                 setupGameUI(currentBoard);
                 if (initialBoard != null && sudokuPanel != null) {
                     sudokuPanel.setInitialBoard(initialBoard);
+                    // Re-render to apply correct styling based on initial board
+                    sudokuPanel.updateBoard(currentBoard);
                 }
             }
         } catch (RuntimeException e) {
@@ -154,6 +157,28 @@ public class SudokuMainFrame extends JFrame {
         solveBtn = new JButton("Solve");
         solveBtn.addActionListener(e -> {
             int[][] b = sudokuPanel.getBoard();
+            int emptyCount = sudokuPanel.countEmptyCells();
+
+            // Check if exactly 5 empty cells
+            if (emptyCount != 5) {
+                JOptionPane.showMessageDialog(this,
+                        "Solver requires exactly 5 empty cells!\nCurrent empty cells: " + emptyCount,
+                        "Cannot Solve",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            int[][] solved = controller.solveGame(b);
+            if (solved.length == 9) {
+                sudokuPanel.updateBoard(solved);
+            } else {
+                JOptionPane.showMessageDialog(this, "Could not solve configuration!");
+            }
+        });
+
+        showSolutionBtn = new JButton("Show Solution");
+        showSolutionBtn.addActionListener(e -> {
+            int[][] b = sudokuPanel.getBoard();
             int[][] solved = controller.solveGame(b);
             if (solved.length == 9) {
                 sudokuPanel.updateBoard(solved);
@@ -174,6 +199,7 @@ public class SudokuMainFrame extends JFrame {
 
         controlPanel.add(verifyBtn);
         controlPanel.add(solveBtn);
+        controlPanel.add(showSolutionBtn);
         controlPanel.add(undoBtn);
         controlPanel.add(backBtn);
     }
