@@ -38,4 +38,16 @@ public interface Viewable {
 
     // Logs the user action
     void logUserAction(String userAction) throws IOException;
+
+    // Save current game state
+    void saveCurrentGame(Backend.SudokuGame game);
+
+    // Clear current game state
+    void clearCurrentGame();
+
+    // Save current game with initial board state
+    void saveCurrentGameWithInitial(int[][] currentBoard, int[][] initialBoard);
+
+    // Get initial board state
+    int[][] getInitialBoard();
 }

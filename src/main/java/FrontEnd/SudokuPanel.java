@@ -133,4 +133,24 @@ public class SudokuPanel extends JPanel {
         }
         return board;
     }
+
+    public int[][] getInitialBoard() {
+        if (initialBoard == null) {
+            return null;
+        }
+        int[][] copy = new int[9][9];
+        for (int i = 0; i < 9; i++) {
+            System.arraycopy(initialBoard[i], 0, copy[i], 0, 9);
+        }
+        return copy;
+    }
+
+    public void setInitialBoard(int[][] board) {
+        if (board != null) {
+            initialBoard = new int[9][9];
+            for (int i = 0; i < 9; i++) {
+                System.arraycopy(board[i], 0, initialBoard[i], 0, 9);
+            }
+        }
+    }
 }
