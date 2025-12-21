@@ -42,7 +42,36 @@ public class Solver {
         // No valid solution found
         return false;
     }
-}
+
+	private static Flyweightcell[] findEmptyCells(int[][] board) {
+
+	    int zeros = 0;
+	    for (int r = 0; r < 9; r++) {
+	        for (int c = 0; c < 9; c++) {
+	            if (board[r][c] == 0) zeros++;
+	        }
+	    }
+
+	    if (zeros != 5) {
+	        throw new IllegalArgumentException("Exactly 5 empty cells required.");
+	    }
+
+	    Flyweightcell[] cells = new Flyweightcell[5];
+	    int found = 0;
+
+	    for (int r = 0; r < 9; r++) {
+	        for (int c = 0; c < 9; c++) {
+	            if (board[r][c] == 0) {
+	                cells[found++] = FlyweightcellFactory.getCell(r, c);
+	            }
+	        }
+	    }
+	    return cells;
+		}
+	
+	}
+
+
     
 
 
