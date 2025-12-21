@@ -2,6 +2,8 @@ package FrontEnd;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 public class SudokuMainFrame extends JFrame {
@@ -12,6 +14,7 @@ public class SudokuMainFrame extends JFrame {
     private JButton verifyBtn;
     private JButton solveBtn;
     private JButton undoBtn;
+    private JButton backBtn;
 
     public SudokuMainFrame() {
         super("Sudoku Game - Lab 10");
@@ -25,59 +28,112 @@ public class SudokuMainFrame extends JFrame {
     }
 
     private void initialize() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                saveGameAndExit();
+            }
+        });
         setSize(800, 600);
         setLocationRelativeTo(null);
 
-        // Check Catalog
-        boolean[] catalogue = controller.getCatalog();
-        boolean hasUnfinished = catalogue[0];
-        boolean hasAllModes = catalogue[1];
+        // Show main menu instead of dialogs
+        showMainMenu();
+    }
 
-        if (hasUnfinished) {
-            int choice = JOptionPane.showConfirmDialog(this,
-                    "Unfinished game found. Continue?",
-                    "Resume Game", JOptionPane.YES_NO_OPTION);
+    private void showMainMenu() {
+        getContentPane().removeAll();
+        setLayout(new BorderLayout());
 
-            if (choice == JOptionPane.YES_OPTION) {
-                loadGame('c'); // 'c' for current
+        // Create main menu panel
+        JPanel menuPanel = new JPanel();
+        menuPanel.setLayout(new GridBagLayout());
+        menuPanel.setBackground(new Color(240, 240, 240));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.ipadx = 100;
+        gbc.ipady = 20;
+
+        // Title
+        JLabel titleLabel = new JLabel("Sudoku Game", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 32));
+        gbc.gridy = 0;
+        gbc.insets = new Insets(30, 10, 30, 10);
+        menuPanel.add(titleLabel, gbc);
+
+        // Reset insets for buttons
+        gbc.insets = new Insets(10, 10, 10, 10);
+
+        // Easy Button
+        gbc.gridy = 1;
+        JButton easyBtn = new JButton("Easy");
+        easyBtn.setFont(new Font("Arial", Font.PLAIN, 18));
+        easyBtn.addActionListener(e -> loadGame('e'));
+        menuPanel.add(easyBtn, gbc);
+
+        // Medium Button
+        gbc.gridy = 2;
+        JButton mediumBtn = new JButton("Medium");
+        mediumBtn.setFont(new Font("Arial", Font.PLAIN, 18));
+        mediumBtn.addActionListener(e -> loadGame('m'));
+        menuPanel.add(mediumBtn, gbc);
+
+        // Hard Button
+        gbc.gridy = 3;
+        JButton hardBtn = new JButton("Hard");
+        hardBtn.setFont(new Font("Arial", Font.PLAIN, 18));
+        hardBtn.addActionListener(e -> loadGame('h'));
+        menuPanel.add(hardBtn, gbc);
+
+        // Continue Button
+        gbc.gridy = 4;
+        JButton continueBtn = new JButton("Continue");
+        continueBtn.setFont(new Font("Arial", Font.PLAIN, 18));
+        continueBtn.addActionListener(e -> {
+            boolean[] catalogue = controller.getCatalog();
+            boolean hasUnfinished = catalogue[0];
+
+            if (hasUnfinished) {
+                loadGame('c');
             } else {
-                showDifficultySelection(hasAllModes);
+                JOptionPane.showMessageDialog(this,
+                        "No saved game found!",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
-        } else {
-            showDifficultySelection(hasAllModes);
-        }
-    }
+        });
+        menuPanel.add(continueBtn, gbc);
 
-    private void showDifficultySelection(boolean hasAllModes) {
-        promptDifficulty();
-    }
+        add(menuPanel, BorderLayout.CENTER);
 
-    private void promptDifficulty() {
-        String[] options = { "Easy", "Medium", "Hard" };
-        int choice = JOptionPane.showOptionDialog(this,
-                "Select Difficulty",
-                "New Game",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null, options, options[0]);
-
-        if (choice == 0)
-            loadGame('e');
-        else if (choice == 1)
-            loadGame('m');
-        else if (choice == 2)
-            loadGame('h');
-        else
-            System.exit(0);
+        setVisible(true);
+        revalidate();
+        repaint();
     }
 
     private void loadGame(char level) {
         try {
-            int[][] board = controller.getGame(level);
-            setupGameUI(board);
+            // Clear Current folder when starting a new game (not resuming)
+            if (level != 'c' && level != 'C') {
+                controller.clearCurrentGame();
+                int[][] board = controller.getGame(level);
+                setupGameUI(board);
+            } else {
+                // Continuing a saved game - load both current and initial boards
+                int[][] currentBoard = controller.getGame(level);
+                int[][] initialBoard = controller.getInitialBoard();
+                setupGameUI(currentBoard);
+                if (initialBoard != null && sudokuPanel != null) {
+                    sudokuPanel.setInitialBoard(initialBoard);
+                }
+            }
         } catch (RuntimeException e) {
             JOptionPane.showMessageDialog(this, "Game not found: " + e.getMessage());
+            showMainMenu(); // Return to menu if game load fails
         }
     }
 
@@ -113,9 +169,35 @@ public class SudokuMainFrame extends JFrame {
             sudokuPanel.updateBoard(b); // Refresh UI
         });
 
+        backBtn = new JButton("Back to Menu");
+        backBtn.addActionListener(e -> returnToMainMenu());
+
         controlPanel.add(verifyBtn);
         controlPanel.add(solveBtn);
         controlPanel.add(undoBtn);
+        controlPanel.add(backBtn);
+    }
+
+    private void returnToMainMenu() {
+        // Save current game before returning to menu
+        if (sudokuPanel != null) {
+            int[][] currentBoard = sudokuPanel.getBoard();
+            int[][] initialBoard = sudokuPanel.getInitialBoard();
+            controller.saveCurrentGameWithInitial(currentBoard, initialBoard);
+        }
+
+        // Clear game UI and show main menu
+        showMainMenu();
+    }
+
+    private void saveGameAndExit() {
+        if (sudokuPanel != null) {
+            int[][] currentBoard = sudokuPanel.getBoard();
+            int[][] initialBoard = sudokuPanel.getInitialBoard();
+            controller.saveCurrentGameWithInitial(currentBoard, initialBoard);
+        }
+        dispose();
+        System.exit(0);
     }
 
     private void setupGameUI(int[][] board) {
@@ -142,6 +224,7 @@ public class SudokuMainFrame extends JFrame {
 
         setVisible(true);
         revalidate();
+        repaint();
     }
 
     public static void main(String[] args) {
