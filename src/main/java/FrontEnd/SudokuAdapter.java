@@ -87,4 +87,24 @@ public class SudokuAdapter implements Controllable {
     public void logUserAction(UserAction userAction) throws IOException {
         controller.logUserAction(userAction.action);
     }
+
+    @Override
+    public void saveCurrentGame(int[][] board) {
+        controller.saveCurrentGame(new SudokuGame(new SudokuBoard(board)));
+    }
+
+    @Override
+    public void clearCurrentGame() {
+        controller.clearCurrentGame();
+    }
+
+    @Override
+    public void saveCurrentGameWithInitial(int[][] currentBoard, int[][] initialBoard) {
+        controller.saveCurrentGameWithInitial(currentBoard, initialBoard);
+    }
+
+    @Override
+    public int[][] getInitialBoard() {
+        return controller.getInitialBoard();
+    }
 }

@@ -125,4 +125,24 @@ public class SudokuController implements Viewable {
         // For now, let's keep it empty or simple print.
         System.out.println("User Action: " + userAction);
     }
+
+    @Override
+    public void saveCurrentGame(Backend.SudokuGame game) {
+        gameStorage.saveCurrentGame(game.arrayBoardCopy());
+    }
+
+    @Override
+    public void clearCurrentGame() {
+        gameStorage.clearCurrentGame();
+    }
+
+    @Override
+    public void saveCurrentGameWithInitial(int[][] currentBoard, int[][] initialBoard) {
+        gameStorage.saveCurrentGameWithInitial(currentBoard, initialBoard);
+    }
+
+    @Override
+    public int[][] getInitialBoard() {
+        return gameStorage.loadInitialBoard();
+    }
 }

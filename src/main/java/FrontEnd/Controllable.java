@@ -21,4 +21,16 @@ public interface Controllable {
 
     // Logs the user action
     void logUserAction(UserAction userAction) throws IOException;
+
+    // Save current game state
+    void saveCurrentGame(int[][] board);
+
+    // Clear current game state
+    void clearCurrentGame();
+
+    // Save current game with initial board state
+    void saveCurrentGameWithInitial(int[][] currentBoard, int[][] initialBoard);
+
+    // Get initial board state
+    int[][] getInitialBoard();
 }
