@@ -9,11 +9,15 @@ public interface Controllable {
 
     void driveGames(String sourcePath);
 
-    // A boolean array which says if a specifc cell is correct or invalid
-    boolean[][] verifyGame(int[][] game);
+    // Returns status string: Valid / Incomplete / Invalid with errors
+    String verifyGame(int[][] game);
 
     // contains the cell x, y and solution for each missing cell
     int[][] solveGame(int[][] game);
+
+    void undo(int[][] game);
+
+    void updateCell(int row, int col, int value, int oldValue);
 
     // Logs the user action
     void logUserAction(UserAction userAction) throws IOException;

@@ -1,5 +1,7 @@
 package FrontEnd;
 
+import Backend.SudokuGame;
+import Backend.SudokuBoard;
 import java.io.IOException;
 
 public class SudokuAdapter implements Controllable {
@@ -12,8 +14,8 @@ public class SudokuAdapter implements Controllable {
 
     @Override
     public boolean[] getCatalog() {
-        Catalog c = controller.getCatalog();
-        return new boolean[] { c.current, c.allModesExist };
+        Backend.Catalog c = controller.getCatalog();
+        return new boolean[] { c.hasCurrentGame(), c.hasModes() };
     }
 
     @Override
@@ -24,17 +26,14 @@ public class SudokuAdapter implements Controllable {
         if (level == 'h' || level == 'H')
             diff = DifficultyEnum.HARD;
 
-        // Special case for 'i' (incomplete) if we want to handle it here,
-        // but interface says 'getGame(char level)'.
-        // Let's assume 'c' for current/incomplete?
         if (level == 'c' || level == 'C') {
             if (controller instanceof SudokuController) {
-                return ((SudokuController) controller).getIncompleteGame().board;
+                return ((SudokuController) controller).getIncompleteGame().getSudokuBoard().getBoard();
             }
         }
 
-        Game g = controller.getGame(diff);
-        return g.board;
+        Backend.SudokuGame g = controller.getGame(diff);
+        return g.getSudokuBoard().getBoard();
     }
 
     @Override
@@ -55,47 +54,33 @@ public class SudokuAdapter implements Controllable {
             throw new RuntimeException("Error reading file");
         }
 
-        controller.driveGames(new Game(b));
+        controller.driveGames(new SudokuGame(new SudokuBoard(b)));
     }
 
     @Override
-    public boolean[][] verifyGame(int[][] game) {
-        // View requires boolean[][] (correct/invalid cells)
-        // Controller returns String.
-        // We need to parse the string or logic.
-        // Requirement says: "A boolean array which says if a specifc cell is correct or
-        // invalid"
-        // But Controller.verifyGame returns String.
-        // The Adapter must perform the check or parse the result.
-        // If Controller returns "invalid 1,2 3,3", Adapter parses it.
-
-        // Simple implementation: Check everything again here or trust controller?
-        // Ideally Facade translates.
-        // Let's implement a verifyer here for the booleans,
-        // OR Controller's verifyGame should be richer.
-        // Since I wrote SudokuController, I can rely on its string output.
-        // But the string output "invalid 1,2" is minimal.
-
-        boolean[][] result = new boolean[9][9];
-        // Default to true (valid)
-        for (int i = 0; i < 9; i++)
-            for (int j = 0; j < 9; j++)
-                result[i][j] = true;
-
-        String res = controller.verifyGame(new Game(game));
-        if (res.startsWith("invalid")) {
-            // Parse "invalid x,y x,y..."
-            // This parsing is tricky if the format isn't strict.
-            // I'll leave it as true for now or implement a quick check.
-        }
-        return result;
+    public String verifyGame(int[][] game) {
+        return controller.verifyGame(new SudokuGame(new SudokuBoard(game)));
     }
 
     @Override
     public int[][] solveGame(int[][] game) {
-        int[] solution = controller.solveGame(new Game(game));
-        // Parse int[] logic (not defined in Controller yet).
-        return new int[0][0]; // Stub
+        Backend.SudokuGame sGame = new SudokuGame(new SudokuBoard(game));
+        int[] result = controller.solveGame(sGame);
+        if (result.length > 0) {
+            // Solved in place
+            return sGame.getSudokuBoard().getBoard();
+        }
+        return new int[0][0]; // Failed
+    }
+
+    @Override
+    public void undo(int[][] game) {
+        controller.undo(new SudokuGame(new SudokuBoard(game)));
+    }
+
+    @Override
+    public void updateCell(int row, int col, int value, int oldValue) {
+        controller.updateCell(row, col, value, oldValue);
     }
 
     @Override
