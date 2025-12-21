@@ -3,6 +3,8 @@ package FrontEnd;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class SudokuPanel extends JPanel {
     private final JTextField[][] cells = new JTextField[9][9];
@@ -44,6 +46,24 @@ public class SudokuPanel extends JPanel {
                 final int r = row;
                 final int c = col;
 
+                // Add key listener to only allow digits 1-9
+                cell.addKeyListener(new KeyAdapter() {
+                    @Override
+                    public void keyTyped(KeyEvent e) {
+                        char c = e.getKeyChar();
+                        // Only allow digits 1-9, backspace, delete
+                        if (!Character.isDigit(c) || c == '0') {
+                            if (c != KeyEvent.VK_BACK_SPACE && c != KeyEvent.VK_DELETE) {
+                                e.consume(); // Ignore this key event
+                            }
+                        }
+                        // Limit to single character
+                        if (cell.getText().length() >= 1 && c != KeyEvent.VK_BACK_SPACE && c != KeyEvent.VK_DELETE) {
+                            e.consume();
+                        }
+                    }
+                });
+
                 cell.addFocusListener(new java.awt.event.FocusAdapter() {
                     @Override
                     public void focusGained(java.awt.event.FocusEvent e) {
@@ -54,7 +74,15 @@ public class SudokuPanel extends JPanel {
                     @Override
                     public void focusLost(java.awt.event.FocusEvent e) {
                         String txt = cell.getText().trim();
-                        int newValue = txt.isEmpty() ? 0 : (txt.matches("[0-9]") ? Integer.parseInt(txt) : 0);
+                        // Only accept 1-9, reject 0 and letters
+                        int newValue = 0;
+                        if (!txt.isEmpty() && txt.matches("[1-9]")) {
+                            newValue = Integer.parseInt(txt);
+                        } else if (!txt.isEmpty()) {
+                            // Invalid input, clear it
+                            cell.setText("");
+                            newValue = 0;
+                        }
                         if (newValue != tempOldValue) {
                             if (changeListener != null) {
                                 changeListener.onCellChange(r, c, newValue, tempOldValue);
