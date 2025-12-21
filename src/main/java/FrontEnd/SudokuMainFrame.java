@@ -81,29 +81,14 @@ public class SudokuMainFrame extends JFrame {
         }
     }
 
-    private void setupGameUI(int[][] board) {
-        getContentPane().removeAll();
-        setLayout(new BorderLayout());
-
-        sudokuPanel = new SudokuPanel();
-        sudokuPanel.setBoard(board);
-        add(sudokuPanel, BorderLayout.CENTER);
-
-        createControlPanel();
-        add(controlPanel, BorderLayout.SOUTH);
-
-        setVisible(true);
-        revalidate();
-    }
-
     private void createControlPanel() {
         controlPanel = new JPanel();
 
         verifyBtn = new JButton("Verify");
         verifyBtn.addActionListener(e -> {
-            boolean[][] res = controller.verifyGame(sudokuPanel.getBoard());
+            String res = controller.verifyGame(sudokuPanel.getBoard());
             // In a real app we'd highlight cells.
-            JOptionPane.showMessageDialog(this, "Verification complete (Visual feedback stub).");
+            JOptionPane.showMessageDialog(this, res);
             try {
                 controller.logUserAction(new UserAction("User Clicked Verify"));
             } catch (IOException ex) {
@@ -111,13 +96,52 @@ public class SudokuMainFrame extends JFrame {
         });
 
         solveBtn = new JButton("Solve");
-        solveBtn.setEnabled(false); // Enable only if 5 cells left
+        solveBtn.addActionListener(e -> {
+            int[][] b = sudokuPanel.getBoard();
+            int[][] solved = controller.solveGame(b);
+            if (solved.length == 9) {
+                sudokuPanel.updateBoard(solved);
+            } else {
+                JOptionPane.showMessageDialog(this, "Could not solve configuration!");
+            }
+        });
 
         undoBtn = new JButton("Undo");
+        undoBtn.addActionListener(e -> {
+            int[][] b = sudokuPanel.getBoard();
+            controller.undo(b); // Modifies b in place via backend/file
+            sudokuPanel.updateBoard(b); // Refresh UI
+        });
 
         controlPanel.add(verifyBtn);
         controlPanel.add(solveBtn);
         controlPanel.add(undoBtn);
+    }
+
+    private void setupGameUI(int[][] board) {
+        getContentPane().removeAll();
+        setLayout(new BorderLayout());
+
+        sudokuPanel = new SudokuPanel();
+        sudokuPanel.setBoard(board);
+        sudokuPanel.setBoardChangeListener(new SudokuPanel.BoardChangeListener() {
+            @Override
+            public void onBoardChange() {
+            }
+
+            @Override
+            public void onCellChange(int row, int col, int newValue, int oldValue) {
+                controller.updateCell(row, col, newValue, oldValue);
+            }
+        });
+
+        add(sudokuPanel, BorderLayout.CENTER);
+
+        createControlPanel();
+        add(controlPanel, BorderLayout.SOUTH);
+
+        setVisible(true);
+        revalidate();
     }
 
     public static void main(String[] args) {

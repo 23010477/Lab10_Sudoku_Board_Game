@@ -1,154 +1,128 @@
 package FrontEnd;
 
-import java.io.*;
-import java.util.*;
+import Backend.GameStorage;
+import Backend.GameStateVerifier;
+import Backend.SudokuGame;
+
+import java.io.IOException;
 
 public class SudokuController implements Viewable {
 
-    private final String BASE_PATH = "sudoku_data";
+    private final GameStorage gameStorage;
 
     public SudokuController() {
-        new File(BASE_PATH + "/easy").mkdirs();
-        new File(BASE_PATH + "/medium").mkdirs();
-        new File(BASE_PATH + "/hard").mkdirs();
-        new File(BASE_PATH + "/current").mkdirs();
+        this.gameStorage = new GameStorage();
     }
 
     @Override
-    public Catalog getCatalog() {
-        boolean unfinished = new File(BASE_PATH + "/current/game.txt").exists();
-        boolean easy = hasFiles(BASE_PATH + "/easy");
-        boolean medium = hasFiles(BASE_PATH + "/medium");
-        boolean hard = hasFiles(BASE_PATH + "/hard");
-        return new Catalog(unfinished, easy && medium && hard);
-    }
-
-    private boolean hasFiles(String path) {
-        File f = new File(path);
-        return f.exists() && f.isDirectory() && f.list() != null && f.list().length > 0;
+    public Backend.Catalog getCatalog() {
+        return gameStorage.getCatalog();
     }
 
     @Override
-    public Game getGame(DifficultyEnum level) {
-        // Basic implementation: Pick random
-        String path = BASE_PATH + "/" + level.toString().toLowerCase();
-        File folder = new File(path);
-        File[] files = folder.listFiles();
-        if (files == null || files.length == 0)
-            throw new RuntimeException("No " + level + " games found.");
-
-        File selected = files[new Random().nextInt(files.length)];
-        return loadGame(selected);
-    }
-
-    public Game getIncompleteGame() {
-        File f = new File(BASE_PATH + "/current/game.txt");
-        if (!f.exists())
-            throw new RuntimeException("No incomplete game.");
-        return loadGame(f);
-    }
-
-    private Game loadGame(File f) {
-        int[][] b = new int[9][9];
-        try (Scanner s = new Scanner(f)) {
-            for (int i = 0; i < 9; i++) {
-                for (int j = 0; j < 9; j++) {
-                    if (s.hasNextInt())
-                        b[i][j] = s.nextInt();
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+    public Backend.SudokuGame getGame(DifficultyEnum level) {
+        // Assuming GameStorage has folders named Easy, Medium, Hard
+        // and loadGame takes a folder path.
+        // However, GameStorage.loadGame(String fileName) seems to load from a specific
+        // file or folder.
+        // Let's check GameStorage again. It takes a folder name and picks the first
+        // file?
+        // "File[] f = new File(fileName).listFiles(); ... return new SudokuGame(...)".
+        // Yes, so passing "Easy" should work if it has files.
+        String folder = "";
+        switch (level) {
+            case EASY:
+                folder = "Easy";
+                break;
+            case MEDIUM:
+                folder = "Medium";
+                break;
+            case HARD:
+                folder = "Hard";
+                break;
         }
-        return new Game(b);
+        try {
+            return gameStorage.loadGame(folder);
+        } catch (RuntimeException e) {
+            // Seed games if missing
+            System.out.println("No games found. Seeding storage...");
+            seedGames();
+            return gameStorage.loadGame(folder);
+        }
+    }
+
+    private void seedGames() {
+        int[][] solvedBoard = {
+                { 5, 3, 4, 6, 7, 8, 9, 1, 2 },
+                { 6, 7, 2, 1, 9, 5, 3, 4, 8 },
+                { 1, 9, 8, 3, 4, 2, 5, 6, 7 },
+                { 8, 5, 9, 7, 6, 1, 4, 2, 3 },
+                { 4, 2, 6, 8, 5, 3, 7, 9, 1 },
+                { 7, 1, 3, 9, 2, 4, 8, 5, 6 },
+                { 9, 6, 1, 5, 3, 7, 2, 8, 4 },
+                { 2, 8, 7, 4, 1, 9, 6, 3, 5 },
+                { 3, 4, 5, 2, 8, 6, 1, 7, 9 }
+        };
+        gameStorage.generateAndStore(solvedBoard);
+    }
+
+    public Backend.SudokuGame getIncompleteGame() {
+        return gameStorage.loadGame("Current");
     }
 
     @Override
-    public void driveGames(Game sourceGame) {
-        // Assume sourceGame is valid full solution for now
-        // Generate E/M/H
-        generate(sourceGame, 10, "easy");
-        generate(sourceGame, 20, "medium");
-        generate(sourceGame, 25, "hard");
+    public void driveGames(Backend.SudokuGame sourceGame) {
+        gameStorage.generateAndStore(sourceGame.arrayBoardCopy());
     }
 
-    private void generate(Game src, int remove, String difficulty) {
-        int[][] board = new int[9][9];
-        for (int i = 0; i < 9; i++)
-            System.arraycopy(src.board[i], 0, board[i], 0, 9);
+    @Override
+    public String verifyGame(Backend.SudokuGame game) {
+        return Backend.GameStateVerifier.VerifyGame(game);
+    }
 
-        RandomPairs rp = new RandomPairs();
-        List<int[]> holes = rp.generateDistinctPairs(remove);
-        for (int[] h : holes) {
-            board[h[0]][h[1]] = 0;
+    @Override
+    public int[] solveGame(Backend.SudokuGame game) {
+        // Use Backend.Solver
+        boolean solved = Backend.Solver.solve(game.getSudokuBoard().getBoard());
+        if (solved) {
+            // board is modified in place
+            // Return stub as void logic is handled in place, but interface returns int[]
+            // We can return the full board or just stub for now.
+            // Controllable.solveGame is int[][], this is int[].
+            // Viewable.solveGame signature is int[] solveGame(SudokuGame).
+            return new int[1]; // Success indicator
         }
-
-        // Save
-        String filename = "game_" + System.currentTimeMillis() + "_" + difficulty + ".txt";
-        saveGame(new Game(board), new File(BASE_PATH + "/" + difficulty + "/" + filename));
+        return new int[0];
     }
 
-    public void saveGame(Game game, File file) {
-        try (PrintWriter pw = new PrintWriter(file)) {
-            for (int[] row : game.board) {
-                for (int val : row)
-                    pw.print(val + " ");
-                pw.println();
-            }
+    @Override
+    public void undo(Backend.SudokuGame game) {
+        try {
+            Backend.Undo.undo(game.getSudokuBoard().getBoard());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public String verifyGame(Game game) {
-        // Check for 0s
-        boolean incomplete = false;
-        for (int[] r : game.board)
-            for (int c : r)
-                if (c == 0)
-                    incomplete = true;
-        if (incomplete)
-            return "incomplete";
+    public void updateCell(int row, int col, int value, int oldValue) {
+        // Log the move using a temporary game object constructed with old value
+        // We need to trick SudokuGame.setCellValue to log (row, col, val, OLD_VAL)
+        // SudokuGame reads OLD_VAL from the board.
+        // So we construct a 1-cell board or just 9x9 with that cell set.
+        int[][] tempBoard = new int[9][9];
+        tempBoard[row][col] = oldValue;
+        Backend.SudokuGame tempGame = new Backend.SudokuGame(new Backend.SudokuBoard(tempBoard));
 
-        // Check validity (Rows, Cols, 3x3)
-        if (isValidSudoku(game.board))
-            return "valid";
-        return "invalid"; // Placeholder for specific error
-    }
-
-    private boolean isValidSudoku(int[][] board) {
-        // Use Sets for validation or simple arrays
-        for (int i = 0; i < 9; i++) {
-            Set<Integer> row = new HashSet<>();
-            Set<Integer> col = new HashSet<>();
-            Set<Integer> box = new HashSet<>();
-            for (int j = 0; j < 9; j++) {
-                if (board[i][j] != 0 && !row.add(board[i][j]))
-                    return false;
-                if (board[j][i] != 0 && !col.add(board[j][i]))
-                    return false;
-                int r = 3 * (i / 3) + j / 3;
-                int c = 3 * (i % 3) + j % 3;
-                if (board[r][c] != 0 && !box.add(board[r][c]))
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public int[] solveGame(Game game) {
-        // Should implement the Permutation solver here
-        // For now, return empty array implies no solution or just stub
-        return new int[0];
+        // Calls setCellValue, which logs: (row, col, value, prevValue=oldValue)
+        tempGame.setCellValue(row, col, value);
     }
 
     @Override
     public void logUserAction(String userAction) throws IOException {
-        File log = new File(BASE_PATH + "/current/log.txt");
-        try (PrintWriter pw = new PrintWriter(new FileWriter(log, true))) {
-            pw.println(userAction);
-        }
+        // Logging is now handled in Backend/SudokuGame for moves.
+        // If this is for general actions, we might need a separate log or just ignore.
+        // For now, let's keep it empty or simple print.
+        System.out.println("User Action: " + userAction);
     }
 }
