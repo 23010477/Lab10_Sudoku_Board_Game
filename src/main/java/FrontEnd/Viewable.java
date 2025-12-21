@@ -3,15 +3,15 @@ package FrontEnd;
 import java.io.IOException;
 
 public interface Viewable {
-    Catalog getCatalog();
+    Backend.Catalog getCatalog();
 
     // Returns a random game with the specified difficulty
     // Note: the Game class is the representation of the soduko game in the
     // controller
-    Game getGame(DifficultyEnum level);
+    Backend.SudokuGame getGame(DifficultyEnum level);
 
     // Gets a sourceSolution and generates three levels of difficulty
-    void driveGames(Game sourceGame);
+    void driveGames(Backend.SudokuGame sourceGame);
 
     // Given a game, if invalid returns invalid and the locates the invalid
     // duplicates
@@ -22,7 +22,7 @@ public interface Viewable {
     // Game Valid -> "valid"
     // Game incomplete -> "incomplete"
     // Game Invalid -> "invalid 1,2 3,3 6,7"
-    String verifyGame(Game game);
+    String verifyGame(Backend.SudokuGame game);
 
     // returns the correct combination for the missing numbers
     // Hint: So, there are many ways you can approach this, one way is
@@ -30,7 +30,11 @@ public interface Viewable {
     // board
     // one other way to to try to encode the location and the answer all in just one
     // int
-    int[] solveGame(Game game);
+    int[] solveGame(Backend.SudokuGame game);
+
+    void undo(Backend.SudokuGame game);
+
+    void updateCell(int row, int col, int value, int oldValue);
 
     // Logs the user action
     void logUserAction(String userAction) throws IOException;
